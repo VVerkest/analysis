@@ -11,7 +11,8 @@ printenv
 echo 1: $1
 echo 2: $2
 echo 3: $3
+echo 4: $4
 
-root.exe -q -b macros/Fun4All_HCalJetPhiShift.C\($1,$2,$3\)
+root.exe -q -b macros/Fun4All_HCalJetPhiShift.C\($1,$2,$3,$4\)
 
 echo all done

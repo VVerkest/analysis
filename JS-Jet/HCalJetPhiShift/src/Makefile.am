@@ -23,6 +23,7 @@ libHCalJetPhiShift_la_LIBADD = \
   -lfun4all \
   -lphool \
   -lg4eval \
+  -lg4jets \
   -lSubsysReco
 
 BUILT_SOURCES = testexternals.cc

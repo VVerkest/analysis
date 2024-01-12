@@ -57,9 +57,26 @@ public:
   {
     m_event = event_number;
   };
+  
+  void SetSingleParticleMode()
+  {
+    m_single_particle = true;
+  };
+  
+  void SetJetMode()
+  {
+    m_single_particle = false;
+  };
+  
+  bool IsSingleParticleMode()
+  {
+    return m_single_particle;
+  }
     
 private:
   std::string m_outputFileName;
+  
+  bool m_single_particle;
   
   //! Output Tree variables
   TTree *m_T;
@@ -96,6 +113,18 @@ private:
   std::vector<float> m_e_emc;
   std::vector<int> m_ieta_emc;
   std::vector<int> m_iphi_emc;
+  
+  //! jets
+  std::vector<float> m_lead_pt;
+  std::vector<float> m_lead_eta;
+  std::vector<float> m_lead_phi;
+  std::vector<float> m_lead_mass;
+
+  std::vector<float> m_jet_pt;
+  std::vector<float> m_jet_eta;
+  std::vector<float> m_jet_phi;
+  std::vector<float> m_jet_mass;
+
 
   int FillTTree(PHCompositeNode *topNode);
 };
