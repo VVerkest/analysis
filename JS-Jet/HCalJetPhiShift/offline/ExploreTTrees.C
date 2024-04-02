@@ -40,11 +40,9 @@ vector<int>   iphi_emc;
 TTree          *fChain;   //!pointer to the analyzed TTree or TChain
 Int_t          fCurrent; //!current Tree number in a TChain
 
-
 const int ncal = 3;
 string cal_name[] = { "iHCal", "oHCal", "EMCal" };
 string cal_tag[] = { "_in", "_out", "_emc" };
-TString inFileName = "HCalJetPhiShift_10k.root";
 //TString inFileName = "HCalJetPhiShift_negativePion_magnetOn_15k.root";
 int n_pt_bins[ncal] = {80,100,100};
 double pt_bin_lo[ncal] = {0.,0.,0.};
@@ -91,8 +89,8 @@ bool tower_in_3x3(float calo_eta, float calo_phi, float eta, float phi){
 };
 
 TH1D *hGeantPhi = new TH1D("hGeantPhi",";truth #phi",64,-M_PI,M_PI);
-TH2D *hEMCal3x3 = new TH2D("hEMCal3x3","pion p_{T};E_{EMCal}^{3x3} about max-E tower [GeV]",30,0.,30.,120,0.,60.);
-TH2D *hEMCal3x3_FINE = new TH2D("hEMCal3x3_FINE","pion p_{T};E_{EMCal}^{3x3} about max-E tower [GeV]",30,0.,30.,200.,0.,2.);
+TH2D *hEMCal3x3 = new TH2D("hEMCal3x3",";pion p_{T};E_{EMCal}^{3x3} about max-E tower [GeV]",30,0.,30.,120,0.,60.);
+TH2D *hEMCal3x3_FINE = new TH2D("hEMCal3x3_FINE",";pion p_{T};E_{EMCal}^{3x3} about max-E tower [GeV]",30,0.,30.,200.,0.,2.);
 TH3D *hE_inner_vs_outer = new TH3D("hE_inner_vs_outer",";pion p_{T};total E deposited in iHCal;total E deposited in oHCal",60,0.,30.,100, 0., 10.,120,0.,60.);
 TH3D *hDeltaPhi_fraction_HcalOverAll = new TH3D("hDeltaPhi_fraction_HcalOverAll",";pion p_{T};E_{HCals}/E_{all calos};oHCal #Delta#phi",60,0.,30.,100,0.,1.,160,-0.4,0.4);
 TH3D *hDeltaPhi_fraction_oHcalOverHcals = new TH3D("hDeltaPhi_fraction_oHcalOverHcals",";pion p_{T};E_{oHCal}/E_{HCals};oHCal #Delta#phi",60,0.,30.,100,0.,1.,160,-0.4,0.4);
@@ -102,7 +100,9 @@ TH2D *hPhi2D[ncal], *hDeltaPhi_pt[ncal], *hDeltaPhi_eta[ncal], *hTowerEt_pionEt[
 
 TH1D *hDeltaPhi[ncal], *hCaloPhi[ncal], *hTowerEt[ncal];
 
-void ExploreTTrees() {
+void ExploreTTrees(std::string charge = "positive") {
+  
+  TString inFileName = Form("out/HCalJetPhiShift_%sPion.root",charge.c_str());
   
   for (int i_cal=0; i_cal<ncal; ++i_cal) {  // LOOP OVER CALORIMETER LAYERS
     hE_weighted_eta_phi[i_cal] = new TH3D(Form("hE_weighted_eta_phi_%s",cal_name[i_cal].c_str()),";pion p_{T};calo #eta;calo #phi",60,0.,30.,n_eta_bins[i_cal],-eta_max[i_cal],eta_max[i_cal],n_phi_bins[i_cal],-M_PI,M_PI);
@@ -298,10 +298,10 @@ void ExploreTTrees() {
     hTemp->SetMarkerColor(kRed);
     hTemp->Draw("COLZ");
     hTemp->ProfileX()->Draw("SAME");
-    can->SaveAs(Form("plots/ExploreTTrees/%s.pdf",histos[i]->GetName()),"PDF");
+    can->SaveAs(Form("plots/ExploreTTrees/%s/%s.pdf",charge.c_str(),histos[i]->GetName()),"PDF");
     hTemp->ProfileX()->Draw("");
     fa1->Draw("SAME");
-    can->SaveAs(Form("plots/ExploreTTrees/%s_pfx.pdf",histos[i]->GetName()),"PDF");
+    can->SaveAs(Form("plots/ExploreTTrees/%s/%s_pfx.pdf",charge.c_str(),histos[i]->GetName()),"PDF");
     for (int j=0; j<3; ++j) {
       double ptlo = (double)10.*j;
       double pthi = (double)10.*(j+1);
@@ -311,10 +311,10 @@ void ExploreTTrees() {
       hTemp->SetMarkerColor(kRed);
       hTemp->Draw("COLZ");
       hTemp->ProfileX()->Draw("SAME");
-      can->SaveAs(Form("plots/ExploreTTrees/%s%s%i%s%i.pdf",histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
+      can->SaveAs(Form("plots/ExploreTTrees/%s/%s%s%i%s%i.pdf",charge.c_str(),histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
       hTemp->ProfileX()->Draw("");
       fa1->Draw("SAME");
-      can->SaveAs(Form("plots/ExploreTTrees/%s%s%i%s%i_pfx.pdf",histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
+      can->SaveAs(Form("plots/ExploreTTrees/%s/%s%s%i%s%i_pfx.pdf",charge.c_str(),histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
     }
     for (int j=1; j<10; ++j) {
       double ptlo = (double)1.*j;
@@ -325,10 +325,10 @@ void ExploreTTrees() {
       hTemp->SetMarkerColor(kRed);
       hTemp->Draw("COLZ");
       hTemp->ProfileX()->Draw("SAME");
-      can->SaveAs(Form("plots/ExploreTTrees/%s%s%i%s%i.pdf",histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
+      can->SaveAs(Form("plots/ExploreTTrees/%s/%s%s%i%s%i.pdf",charge.c_str(),histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
       hTemp->ProfileX()->Draw("");
       fa1->Draw("SAME");
-      can->SaveAs(Form("plots/ExploreTTrees/%s%s%i%s%i_pfx.pdf",histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
+      can->SaveAs(Form("plots/ExploreTTrees/%s/%s%s%i%s%i_pfx.pdf",charge.c_str(),histos[i]->GetName(),us,(int)ptlo,us,(int)pthi),"PDF");
     }
     histos[i]->GetXaxis()->SetRangeUser(0.,30.);
   }
@@ -336,10 +336,10 @@ void ExploreTTrees() {
 //  gStyle->SetPalette(kCMYK);
 
   hEMCal3x3->Draw("COLZ");
-  can->SaveAs("plots/ExploreTTrees/hEMCal3x3.pdf","PDF");
+  can->SaveAs(Form("plots/ExploreTTrees/%s/hEMCal3x3.pdf",charge.c_str()),"PDF");
 
   hEMCal3x3_FINE->Draw("COLZ");
-  can->SaveAs("plots/ExploreTTrees/hEMCal3x3_FINE.pdf","PDF");
+  can->SaveAs(Form("plots/ExploreTTrees/%s/hEMCal3x3_FINE.pdf",charge.c_str()),"PDF");
 
   
   TF1 *f1 = new TF1("f1","gaus",0.,0.6);
@@ -357,7 +357,7 @@ void ExploreTTrees() {
     hEMCal3x3_FINE_py[i-1]->SetTitle(Form("%i-%i GeV/c pion",ptlo,pthi));
     hEMCal3x3_FINE_py[i-1]->SetStats(0);
     hEMCal3x3_FINE_py[i-1]->GetYaxis()->SetRangeUser(0.0,80.0);
-    hEMCal3x3_FINE_py[i-1]->Draw("SAMEPLCPMC");
+    hEMCal3x3_FINE_py[i-1]->Draw("ESAMEPLCPMC");
     hEMCal3x3_FINE_py[i-1]->Fit(f1,"","",0.,0.6);
     MIP_value[i-1] = f1->GetMaximumX();
   }

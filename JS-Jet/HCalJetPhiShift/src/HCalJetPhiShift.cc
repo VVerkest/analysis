@@ -14,16 +14,12 @@
 #include <g4main/PHG4Shower.h>
 #include <g4main/PHG4TruthInfoContainer.h>
 #include <g4main/PHG4VtxPoint.h>
+#include <g4main/PHG4HitContainer.h>
+#include <g4main/PHG4Hit.h>
 
 #include <jetbase/JetMap.h>
 #include <jetbase/Jetv1.h>
 #include <jetbase/JetContainerv1.h>
-
-//#include <g4detectors/PHG4CellContainer.h>
-//#include <g4detectors/PHG4CylinderCellGeomContainer.h>
-//#include <g4detectors/PHG4CylinderGeomContainer.h>
-//#include <g4detectors/PHG4Cell.h>
-//#include <g4detectors/PHG4CylinderCellGeom.h>
 
 #include <fun4all/Fun4AllDstInputManager.h>
 #include <fun4all/Fun4AllReturnCodes.h>
@@ -41,6 +37,8 @@
 
 #include <TFile.h>
 #include <TTree.h>
+#include <TVector3.h>
+#include <TLorentzVector.h>
 
 //____________________________________________________________________________..
 HCalJetPhiShift::HCalJetPhiShift(const std::string &name, const std::string &outputFile):
@@ -59,26 +57,28 @@ m_pt(),
 m_vx(),
 m_vy(),
 m_vz(),
-m_id(),
 m_eta_in(),
 m_phi_in(),
 m_e_in(),
-m_ieta_in(),
-m_iphi_in(),
+m_eta_in_g4hit(),
+m_phi_in_g4hit(),
+m_e_in_g4hit(),
 m_eta_out(),
 m_phi_out(),
 m_e_out(),
-m_ieta_out(),
-m_iphi_out(),
+m_eta_out_g4hit(),
+m_phi_out_g4hit(),
+m_e_out_g4hit(),
 m_eta_emc(),
 m_phi_emc(),
 m_e_emc(),
-m_ieta_emc(),
-m_iphi_emc(),
-m_lead_pt(),
-m_lead_eta(),
-m_lead_phi(),
-m_lead_mass(),
+m_eta_emc_g4hit(),
+m_phi_emc_g4hit(),
+m_e_emc_g4hit(),
+m_truth_pt(),
+m_truth_eta(),
+m_truth_phi(),
+m_truth_mass(),
 m_jet_pt(),
 m_jet_eta(),
 m_jet_phi(),
@@ -114,34 +114,36 @@ int HCalJetPhiShift::Init(PHCompositeNode* /*topNode*/)
   m_T->Branch("vx", &m_vx);
   m_T->Branch("vy", &m_vy);
   m_T->Branch("vz", &m_vz);
-  m_T->Branch("id", &m_id);
   if (m_single_particle)
   {
     m_T->Branch("nTow_in", &m_nTow_in);
     m_T->Branch("eta_in", &m_eta_in);
     m_T->Branch("phi_in", &m_phi_in);
     m_T->Branch("e_in", &m_e_in);
-    m_T->Branch("ieta_in", &m_ieta_in);
-    m_T->Branch("iphi_in", &m_iphi_in);
+    m_T->Branch("eta_in_g4hit", &m_eta_in_g4hit);
+    m_T->Branch("phi_in_g4hit", &m_phi_in_g4hit);
+    m_T->Branch("e_in_g4hit", &m_e_in_g4hit);
     m_T->Branch("nTow_out", &m_nTow_out);
     m_T->Branch("eta_out", &m_eta_out);
     m_T->Branch("phi_out", &m_phi_out);
     m_T->Branch("e_out", &m_e_out);
-    m_T->Branch("ieta_out", &m_ieta_out);
-    m_T->Branch("iphi_out", &m_iphi_out);
+    m_T->Branch("eta_out_g4hit", &m_eta_out_g4hit);
+    m_T->Branch("phi_out_g4hit", &m_phi_out_g4hit);
+    m_T->Branch("e_out_g4hit", &m_e_out_g4hit);
     m_T->Branch("nTow_emc", &m_nTow_emc);
     m_T->Branch("eta_emc", &m_eta_emc);
     m_T->Branch("phi_emc", &m_phi_emc);
     m_T->Branch("e_emc", &m_e_emc);
-    m_T->Branch("ieta_emc", &m_ieta_emc);
-    m_T->Branch("iphi_emc", &m_iphi_emc);
+    m_T->Branch("eta_emc_g4hit", &m_eta_emc_g4hit);
+    m_T->Branch("phi_emc_g4hit", &m_phi_emc_g4hit);
+    m_T->Branch("e_emc_g4hit", &m_e_emc_g4hit);
   }
   if (!m_single_particle)
   {
-    m_T->Branch("lead_pt", &m_lead_pt);
-    m_T->Branch("lead_eta", &m_lead_eta);
-    m_T->Branch("lead_phi", &m_lead_phi);
-    m_T->Branch("lead_mass", &m_lead_mass);
+    m_T->Branch("truth_pt", &m_truth_pt);
+    m_T->Branch("truth_eta", &m_truth_eta);
+    m_T->Branch("truth_phi", &m_truth_phi);
+    m_T->Branch("truth_mass", &m_truth_mass);
     m_T->Branch("jet_pt", &m_jet_pt);
     m_T->Branch("jet_eta", &m_jet_eta);
     m_T->Branch("jet_phi", &m_jet_phi);
@@ -177,29 +179,35 @@ int HCalJetPhiShift::ResetEvent(PHCompositeNode *topNode)
   m_nTow_in = 0;
   m_nTow_out = 0;
   m_nTow_emc = 0;
-  m_id.clear();
+
   m_eta_in.clear();
   m_phi_in.clear();
   m_e_in.clear();
-  m_ieta_in.clear();
-  m_iphi_in.clear();
   
   m_eta_out.clear();
   m_phi_out.clear();
   m_e_out.clear();
-  m_ieta_out.clear();
-  m_iphi_out.clear();
   
   m_eta_emc.clear();
   m_phi_emc.clear();
   m_e_emc.clear();
-  m_ieta_emc.clear();
-  m_iphi_emc.clear();
   
-  m_lead_pt.clear();
-  m_lead_eta.clear();
-  m_lead_phi.clear();
-  m_lead_mass.clear();
+  m_eta_in_g4hit.clear();
+  m_phi_in_g4hit.clear();
+  m_e_in_g4hit.clear();
+  
+  m_eta_out_g4hit.clear();
+  m_phi_out_g4hit.clear();
+  m_e_out_g4hit.clear();
+  
+  m_eta_emc_g4hit.clear();
+  m_phi_emc_g4hit.clear();
+  m_e_emc_g4hit.clear();
+  
+  m_truth_pt.clear();
+  m_truth_eta.clear();
+  m_truth_phi.clear();
+  m_truth_mass.clear();
   
   m_jet_pt.clear();
   m_jet_eta.clear();
@@ -290,7 +298,6 @@ int HCalJetPhiShift::FillTTree(PHCompositeNode *topNode)
     TowerInfoContainer *towersIH3 = findNode::getClass<TowerInfoContainer>(topNode, "TOWERINFO_CALIB_HCALIN");
     TowerInfoContainer *towersOH3 = findNode::getClass<TowerInfoContainer>(topNode, "TOWERINFO_CALIB_HCALOUT");
     TowerInfoContainer *towersEM3 = findNode::getClass<TowerInfoContainer>(topNode, "TOWERINFO_CALIB_CEMC");
-    //  TowerInfoContainer *towersEM3 = findNode::getClass<TowerInfoContainer>(topNode, "TOWERINFO_RAW_CEMC");
     RawTowerGeomContainer *tower_geomIH = findNode::getClass<RawTowerGeomContainer>(topNode, "TOWERGEOM_HCALIN");
     RawTowerGeomContainer *tower_geomOH = findNode::getClass<RawTowerGeomContainer>(topNode, "TOWERGEOM_HCALOUT");
     RawTowerGeomContainer *tower_geomEM = findNode::getClass<RawTowerGeomContainer>(topNode, "TOWERGEOM_CEMC");
@@ -331,8 +338,6 @@ int HCalJetPhiShift::FillTTree(PHCompositeNode *topNode)
         m_eta_in.push_back(tower_eta);
         m_phi_in.push_back(tower_phi);
         m_e_in.push_back(tower_in->get_energy());
-        m_ieta_in.push_back(ieta);
-        m_iphi_in.push_back(iphi);
       }
       
       // Outer HCal
@@ -351,8 +356,6 @@ int HCalJetPhiShift::FillTTree(PHCompositeNode *topNode)
         m_eta_out.push_back(tower_eta);
         m_phi_out.push_back(tower_phi);
         m_e_out.push_back(tower_out->get_energy());
-        m_ieta_out.push_back(ieta);
-        m_iphi_out.push_back(iphi);
       }
       
     }
@@ -385,11 +388,54 @@ int HCalJetPhiShift::FillTTree(PHCompositeNode *topNode)
         m_eta_emc.push_back(tower_eta);
         m_phi_emc.push_back(tower_phi);
         m_e_emc.push_back(tower_emc->get_energy());
-        m_ieta_emc.push_back(ieta);
-        m_iphi_emc.push_back(iphi);
       }
       
     }
+    
+    PHG4HitContainer* _hcalout_hit_container = findNode::getClass<PHG4HitContainer>(topNode,"G4HIT_HCALOUT");
+    PHG4HitContainer* _hcalin_hit_container = findNode::getClass<PHG4HitContainer>(topNode,"G4HIT_HCALIN");
+    PHG4HitContainer* _cemc_hit_container = findNode::getClass<PHG4HitContainer>(topNode,"G4HIT_CEMC");
+    // https://github.com/VVerkest/analysis/blob/master/EMCal-calibration/EMCalCalib/EMCalCalib.C
+    
+    // INNER HCAL
+    if (_hcalin_hit_container){
+      PHG4HitContainer::ConstRange hcalin_hit_range = _hcalin_hit_container->getHits();
+      for (PHG4HitContainer::ConstIterator hit_iter = hcalin_hit_range.first; hit_iter != hcalin_hit_range.second; hit_iter++){
+        PHG4Hit *this_hit = hit_iter->second;
+        assert(this_hit);
+        const TVector3 hit(this_hit->get_avg_x(), this_hit->get_avg_y(), this_hit->get_avg_z());
+        m_eta_in_g4hit.push_back(hit.Eta());
+        m_phi_in_g4hit.push_back(hit.Phi());
+        m_e_in_g4hit.push_back(this_hit->get_edep());
+      }
+    }
+    
+    // OUTER HCAL
+    if (_hcalout_hit_container){
+      PHG4HitContainer::ConstRange hcalout_hit_range = _hcalout_hit_container->getHits();
+      for (PHG4HitContainer::ConstIterator hit_iter = hcalout_hit_range.first; hit_iter != hcalout_hit_range.second; hit_iter++){
+        PHG4Hit *this_hit = hit_iter->second;
+        assert(this_hit);
+        const TVector3 hit(this_hit->get_avg_x(), this_hit->get_avg_y(), this_hit->get_avg_z());
+        m_eta_out_g4hit.push_back(hit.Eta());
+        m_phi_out_g4hit.push_back(hit.Phi());
+        m_e_out_g4hit.push_back(this_hit->get_edep());
+      }
+    }
+    
+    // EMCAL
+    if (_cemc_hit_container){
+      PHG4HitContainer::ConstRange cemc_hit_range = _cemc_hit_container->getHits();
+      for (PHG4HitContainer::ConstIterator hit_iter = cemc_hit_range.first; hit_iter != cemc_hit_range.second; hit_iter++){
+        PHG4Hit *this_hit = hit_iter->second;
+        assert(this_hit);
+        const TVector3 hit(this_hit->get_avg_x(), this_hit->get_avg_y(), this_hit->get_avg_z());
+        m_eta_emc_g4hit.push_back(hit.Eta());
+        m_phi_emc_g4hit.push_back(hit.Phi());
+        m_e_emc_g4hit.push_back(this_hit->get_edep());
+      }
+    }
+    
   }
   
   //  topNode->print();
@@ -435,10 +481,10 @@ int HCalJetPhiShift::FillTTree(PHCompositeNode *topNode)
     {
       Jet* jet = iter->second;
       if (jet->get_pt()>=5.) {
-        m_lead_pt.push_back(jet->get_pt());
-        m_lead_eta.push_back(jet->get_eta());
-        m_lead_phi.push_back(jet->get_phi());
-        m_lead_mass.push_back(jet->get_mass());
+        m_truth_pt.push_back(jet->get_pt());
+        m_truth_eta.push_back(jet->get_eta());
+        m_truth_phi.push_back(jet->get_phi());
+        m_truth_mass.push_back(jet->get_mass());
       }
     }
   }

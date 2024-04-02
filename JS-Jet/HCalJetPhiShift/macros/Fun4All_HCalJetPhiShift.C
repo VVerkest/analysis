@@ -3,6 +3,8 @@
 //    store truth and all calo information
 // -- jet: run over MDC2 sim-data and find truth
 //    and calorimeter jets
+// CreateFileList.pl -run 8 -type 11 -nop DST_TRUTH DST_CALO_CLUSTER DST_GLOBAL DST_TRUTH_JET
+// CreateFileList.pl -run 8 -type 12 -nop DST_TRUTH DST_CALO_CLUSTER DST_GLOBAL DST_TRUTH_JET
 
 #ifndef MACRO_FUN4ALLG4SPHENIX_C
 #define MACRO_FUN4ALLG4SPHENIX_C
@@ -66,6 +68,8 @@ int Fun4All_HCalJetPhiShift(
   
   //  string outputFile = "HCalJetPhiShift"
   string outputroot = outdir + "/HCalJetPhiShift";
+  if (single_particle) {outputroot += "_particle";}
+  else {outputroot += "_jet";}
   if (index>-1) {
     outputroot += Form("_%05d", index);
   }
@@ -125,7 +129,7 @@ int Fun4All_HCalJetPhiShift(
                                                                               PHG4SimpleEventGenerator::Gaus);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_mean(0., 0., 0.);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_vertex_distribution_width(0.0, 0.0, 0.0);
-    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1, 1);
+    INPUTGENERATOR::SimpleEventGenerator[0]->set_eta_range(-1.1, 1.1);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_phi_range(-M_PI, M_PI);
     INPUTGENERATOR::SimpleEventGenerator[0]->set_pt_range(1., 30.);
   }
@@ -518,53 +522,42 @@ int Fun4All_HCalJetPhiShift(
     return 0;
   }
   
-  //RawTowerCalibration *TowerCalibration = new RawTowerCalibration("EmcRawTowerCalibration");
-  //TowerCalibration->Detector("CEMC");
-  //TowerCalibration->set_calib_algorithm(RawTowerCalibration::kSimple_linear_calibration);
-  //TowerCalibration->set_calib_const_GeV_ADC(1. / 0.023);
-  //TowerCalibration->set_pedstal_ADC(0);
-  //se->registerSubsystem(TowerCalibration);
   
   if (!single_particle)
   {
     
-//    Form("%s/%sdst_truth_jet.list",outdir,"lists/10GeV/")
-    
     Fun4AllInputManager *injet = new Fun4AllDstInputManager("DSTjet");
-    injet->AddListFile(Form("%s/%sdst_truth_jet.list",outdir,"lists/10GeV/"),1);
+//    injet->AddListFile("lists/10GeV/dst_truth_jet.list",1);
+    injet->AddFile(Form("DST_TRUTH_JET_pythia8_Jet10-0000000008-%05d.root", index));
     se->registerInputManager(injet);
     
     Fun4AllInputManager *inglob = new Fun4AllDstInputManager("DSTglobal");
-    inglob->AddListFile(Form("%s/%sdst_global.list",outdir,"lists/10GeV/"),1);
+//    inglob->AddListFile("lists/10GeV/dst_global.list",1);
+    inglob->AddFile(Form("DST_GLOBAL_pythia8_Jet10-0000000008-%05d.root", index));
     se->registerInputManager(inglob);
     
     Fun4AllInputManager *intrue = new Fun4AllDstInputManager("DSTtrue");
-    intrue->AddListFile(Form("%s/%sdst_truth.list",outdir,"lists/10GeV/"),1);
+//    intrue->AddListFile("lists/10GeV/dst_truth.list",1);
+    intrue->AddFile(Form("DST_TRUTH_pythia8_Jet10-0000000008-%05d.root", index));
     se->registerInputManager(intrue);
     
     Fun4AllInputManager *incalo = new Fun4AllDstInputManager("DSTcalo");
-    incalo->AddListFile(Form("%s/%sdst_calo_cluster.list",outdir,"lists/10GeV/"),1);
+//    incalo->AddListFile("lists/10GeV/dst_calo_cluster.list",1);
+    incalo->AddFile(Form("DST_CALO_CLUSTER_pythia8_Jet10-0000000008-%05d.root", index));
     se->registerInputManager(incalo);
     
     JetReco *towerjetreco = new JetReco();
     towerjetreco->add_input(new TowerJetInput(Jet::CEMC_TOWERINFO));
     towerjetreco->add_input(new TowerJetInput(Jet::HCALIN_TOWERINFO));
     towerjetreco->add_input(new TowerJetInput(Jet::HCALOUT_TOWERINFO));
-    towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_Tower_r04");
+//    towerjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_Tower_r04");
+    FastJetOptions fj_opt {{ Jet::ALGO::ANTIKT, JET_R,0.4, JET_MAX_ETA,0.7, JET_MIN_PT,1. }};
+    towerjetreco->add_algo(new FastJetAlgo(fj_opt), "AntiKt_Tower_r04");
     towerjetreco->set_algo_node("ANTIKT");
     towerjetreco->set_input_node("TOWER");
     towerjetreco->Verbosity(0);
     se->registerSubsystem(towerjetreco);
     
-//    JetReco *truthjetreco = new JetReco();
-//    truthjetreco->add_algo(new FastJetAlgo(Jet::ANTIKT, 0.4), "AntiKt_Truth_r04");
-//    towerjetreco->add_input(new TruthJetInput(Jet::CEMC_TOWERINFO));
-//    towerjetreco->add_input(new TruthJetInput(Jet::HCALIN_TOWERINFO));
-//    towerjetreco->add_input(new TruthJetInput(Jet::HCALOUT_TOWERINFO));
-//    truthjetreco->set_algo_node("ANTIKT");
-//    truthjetreco->set_input_node("TRUTH");
-//    truthjetreco->Verbosity(0);
-//    se->registerSubsystem(truthjetreco);
   }
   
   HCalJetPhiShift *caloPhiShift = new HCalJetPhiShift("caloPhiShift",outputFile);

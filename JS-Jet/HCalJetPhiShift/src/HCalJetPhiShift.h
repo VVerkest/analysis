@@ -94,31 +94,33 @@ private:
   float m_vy;
   float m_vz;
 
-  //! towers
-  std::vector<int> m_id;
+  //! towers and G4 hits
   std::vector<float> m_eta_in;
   std::vector<float> m_phi_in;
   std::vector<float> m_e_in;
-  std::vector<int> m_ieta_in;
-  std::vector<int> m_iphi_in;
+  std::vector<float> m_eta_in_g4hit;
+  std::vector<float> m_phi_in_g4hit;
+  std::vector<float> m_e_in_g4hit;
   
   std::vector<float> m_eta_out;
   std::vector<float> m_phi_out;
   std::vector<float> m_e_out;
-  std::vector<int> m_ieta_out;
-  std::vector<int> m_iphi_out;
-
+  std::vector<float> m_eta_out_g4hit;
+  std::vector<float> m_phi_out_g4hit;
+  std::vector<float> m_e_out_g4hit;
+  
   std::vector<float> m_eta_emc;
   std::vector<float> m_phi_emc;
   std::vector<float> m_e_emc;
-  std::vector<int> m_ieta_emc;
-  std::vector<int> m_iphi_emc;
+  std::vector<float> m_eta_emc_g4hit;
+  std::vector<float> m_phi_emc_g4hit;
+  std::vector<float> m_e_emc_g4hit;
   
   //! jets
-  std::vector<float> m_lead_pt;
-  std::vector<float> m_lead_eta;
-  std::vector<float> m_lead_phi;
-  std::vector<float> m_lead_mass;
+  std::vector<float> m_truth_pt;
+  std::vector<float> m_truth_eta;
+  std::vector<float> m_truth_phi;
+  std::vector<float> m_truth_mass;
 
   std::vector<float> m_jet_pt;
   std::vector<float> m_jet_eta;
