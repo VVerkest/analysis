@@ -18,11 +18,14 @@
 /// Tracking includes
 #include <globalvertex/GlobalVertex.h>
 #include <globalvertex/GlobalVertexMap.h>
+#include <globalvertex/SvtxVertexMap.h>
+#include <globalvertex/SvtxVertex.h>
 #include <trackbase_historic/SvtxTrack.h>
 #include <trackbase_historic/SvtxTrackMap.h>
 #include <trackbase_historic/SvtxTrackState.h>
 #include <trackbase_historic/TrackAnalysisUtils.h>
 #include <trackbase_historic/TrackSeed.h>
+
 
 #include <Acts/Definitions/Algebra.hpp>
 
@@ -62,8 +65,7 @@
 using namespace std;
 
 /**
- * TrackAndClusterMatchingQA is a class developed to reconstruct jets containing a D-meson
- * The class can be adapted to tag jets using any kind of particle
+ * TrackAndClusterMatchingQA is a class developed for jet QA
  * Author: Antonio Silva (antonio.sphenix@gmail.com)
  */
 
@@ -125,6 +127,11 @@ int TrackAndClusterMatchingQA::Init(PHCompositeNode *topNode)
   _h2Track_TPC_Hits_vs_Eta = new TH2F("_h2Track_TPC_Hits_vs_Eta", ";Number of TPC hits;track #eta", 50, -0.5, 49.5, 22, -1.1, 1.1);
   _h2Track_TPC_Hits_vs_Pt = new TH2F("_h2Track_TPC_Hits_vs_Pt", ";Number of TPC hits;track #it{p}_{T} (GeV/#it{c})", 50, -0.5, 49.5, 40, 0., 20);
 
+  _h1deta = new TH1F("hdeta", "Cluster #deta; #deta; Entries", 20, -0.2, 0.2);    //deta distribution
+  _h1dphi  = new TH1F("hdphi", "Cluster #dphi; #dphi; Entries", 50, -0.15, 0.15);   //dphi distribution
+  _h1min_dR  = new TH1F("hdR", "Cluster #dR; #dR; Entries", 100,0.,5.);   //jet delta radius
+  _h2phi_vs_deta = new TH2F("_h2phi_vs_deta", ";#dphi; #deta",  50, -0.15, 0.15, 20, -0.2, 0.2); // deta Vs. dphi distribution
+
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -139,26 +146,52 @@ int TrackAndClusterMatchingQA::process_event(PHCompositeNode *topNode)
     cout << "Beginning process_event in TrackAndClusterMatchingQA" << endl;
   }
 
+  GlobalVertex *vtx = nullptr;
+  CLHEP::Hep3Vector vertex(0., 0., 0.);
+
+  bool has_vertex = false;
+
   GlobalVertexMap *vertexmap = findNode::getClass<GlobalVertexMap>(topNode, "GlobalVertexMap");
-  if (!vertexmap)
+  if (vertexmap)
   {
-    std::cout << "Fatal Error - GlobalVertexMap node is missing. Please turn on the do_global flag in the main macro in order to reconstruct the global vertex." << std::endl;
-    return Fun4AllReturnCodes::ABORTEVENT;
+    if (vertexmap->empty())
+    {
+      if(Verbosity() > 5) std::cout << "GlobalVertexMap node is empty. Please turn on the do_global flag in the main macro in order to reconstruct the global vertex." << std::endl;
+    }
+    else
+    {
+      vtx = vertexmap->begin()->second;
+      vertex.setX(vtx->get_x());
+      vertex.setY(vtx->get_y());
+      vertex.setZ(vtx->get_z());
+      has_vertex = true;
+    }
+  }
+  else
+  {
+    if(Verbosity() > 5) std::cout << "GlobalVertexMap node is missing. Please turn on the do_global flag in the main macro in order to reconstruct the global vertex." << std::endl;
   }
 
-  if (vertexmap->empty())
+  SvtxVertex *svtx_vtx = nullptr;
+
+  SvtxVertexMap *vertexMap = findNode::getClass<SvtxVertexMap>(topNode, "SvtxVertexMap");
+
+  if(vertexMap)
   {
-    std::cout << "Fatal Error - GlobalVertexMap node is empty. Please turn on the do_global flag in the main macro in order to reconstruct the global vertex." << std::endl;
-    return Fun4AllReturnCodes::ABORTEVENT;
+    if(!vertexMap->empty())
+    {
+      svtx_vtx = vertexMap->begin()->second;
+      vertex.setX(svtx_vtx->get_x());
+      vertex.setY(svtx_vtx->get_y());
+      vertex.setZ(svtx_vtx->get_z());
+      has_vertex = true;
+    }
   }
 
-  GlobalVertex *vtx = vertexmap->begin()->second;
-  if (vtx == nullptr)
+  if(has_vertex == false && (!_use_origin_when_no_vertex))
   {
     return Fun4AllReturnCodes::ABORTEVENT;
   }
-
-  CLHEP::Hep3Vector vertex(vtx->get_x(), vtx->get_y(), vtx->get_z());
 
   _track_map = findNode::getClass<SvtxTrackMap>(topNode, "SvtxTrackMap");
 
@@ -279,7 +312,19 @@ int TrackAndClusterMatchingQA::process_event(PHCompositeNode *topNode)
     if(cluster_match)
     {
       _h2trackPt_vs_clusterEt->Fill(track->get_pt(), RawClusterUtility::GetET(*cluster_match, vertex));
+
+      float cluster_phi = RawClusterUtility::GetAzimuthAngle(*cluster_match, vertex);
+      float cluster_eta = RawClusterUtility::GetPseudorapidity(*cluster_match, vertex);
+      float deta = track_eta - cluster_eta;   //added for eta analysis
+      float dphi = track_phi - cluster_phi;   //added for phi analysis
+
+      _h1deta->Fill(deta);
+      _h1dphi->Fill(dphi);
+      _h2phi_vs_deta->Fill(dphi,deta);
+
     }
+
+      _h1min_dR->Fill(min_dR);
 
   }
 
