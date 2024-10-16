@@ -51,24 +51,24 @@ void Fun4All_JetVal(const char *filelisttruth = "dst_truth_jet.list",
 
   myJetVal->setPtRange(5, 100);
   myJetVal->setEtaRange(-1.1, 1.1);
-  myJetVal->doUnsub(1);
-  myJetVal->doTruth(1);
-  myJetVal->doSeeds(1);
+  myJetVal->doUnsub(0);
+  myJetVal->doTruth(0);
+  myJetVal->doSeeds(0);
   se->registerSubsystem(myJetVal);
  
-  Fun4AllInputManager *intrue = new Fun4AllDstInputManager("DSTtruth");
-  intrue->AddListFile(filelisttruth,1);
-  se->registerInputManager(intrue);
+//  Fun4AllInputManager *intrue = new Fun4AllDstInputManager("DSTtruth");
+//  intrue->AddListFile(filelisttruth,1);
+//  se->registerInputManager(intrue);
 
   Fun4AllInputManager *in2 = new Fun4AllDstInputManager("DSTcalo");
   in2->AddListFile(filelistcalo,1);
   se->registerInputManager(in2);
 
-  Fun4AllInputManager *in3 = new Fun4AllDstInputManager("DSTglobal");
-  in3->AddListFile(filelistglobal,1);
-  se->registerInputManager(in3);
+//  Fun4AllInputManager *in3 = new Fun4AllDstInputManager("DSTglobal");
+//  in3->AddListFile(filelistglobal,1);
+//  se->registerInputManager(in3);
   
-  se->run(-1);
+  se->run(100);
   se->End();
 
   gSystem->Exit(0);
