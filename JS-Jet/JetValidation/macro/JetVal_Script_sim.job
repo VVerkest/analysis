@@ -1,0 +1,12 @@
+Universe	= vanilla
+Executable 	= JetVal_Script_sim.sh
+notification 	= Never
+Output  	= /sphenix/user/verkest/analysis/JS-Jet/JetValidation/macro/logs/condor_sim$(process).out
+Error           = /sphenix/user/verkest/analysis/JS-Jet/JetValidation/macro/logs/condor_sim$(process).err
+Log  		= /tmp/condor_verkest_sim$(process).log
+Arguments 	= "$(Process)"	
+Initialdir  	= /sphenix/user/verkest/analysis/JS-Jet/JetValidation/macro/
+request_memory = 4096MB
+concurrency_limits=CONCURRENCY_LIMIT_DEFAULT:1000
+PeriodicHold = (NumJobStarts>=1 && JobStatus == 1)
+Queue 10000 

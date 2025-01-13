@@ -22,6 +22,8 @@ libJetValidation_la_SOURCES = \
 libJetValidation_la_LIBADD = \
   -lphool \
   -lSubsysReco \
+  -lcalotrigger \
+  -lcalotrigger_io \
   -lfun4all \
   -lg4dst \
   -lg4eval \

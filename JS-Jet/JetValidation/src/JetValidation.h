@@ -7,6 +7,8 @@
 #include <jetbase/Jetv1.h>
 #include <jetbase/Jetv2.h>
 
+#include <calotrigger/TriggerAnalyzer.h>
+
 #include <string>
 #include <vector>
 
@@ -98,7 +100,12 @@ class JetValidation : public SubsysReco
   int m_doSeeds;
   int m_doUnsubJet;
 
+  TriggerAnalyzer *triggeranalyzer{nullptr};
 
+  std::vector<int> EMC_const;
+  std::vector<int> IHC_const;
+  std::vector<int> OHC_const;
+  
   //! Output Tree variables
   TTree *m_T;
 
@@ -121,6 +128,11 @@ class JetValidation : public SubsysReco
   std::vector<float> m_phi;
   std::vector<float> m_e;
   std::vector<float> m_pt;
+
+  std::vector<float> m_UE_energy;
+  std::vector<float> m_UE_eta;
+  std::vector<float> m_UE_phi;
+  std::vector<int> m_UE_caloID;
 
   //! clusters
   std::vector<float> m_cleta;
