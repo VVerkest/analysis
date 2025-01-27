@@ -116,6 +116,6 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
   se->End();
 
   gSystem->Exit(0);
-  return 0;
+ // return 0;
 
 }
