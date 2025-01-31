@@ -22,6 +22,7 @@
 #include <calotrigger/TriggerAnalyzer.h>
 #include <ffarawobjects/Gl1Packet.h>
 #include <jetbackground/TowerBackground.h>
+#include <jetBackgroundCut.h>
 #include <calobase/RawCluster.h>
 #include <calobase/RawClusterContainer.h>
 #include <calobase/RawClusterUtility.h>
@@ -195,6 +196,7 @@ int JetValidation::process_event(PHCompositeNode *topNode)
       cout<<"Event "<<m_event<<endl;
     }
 
+
   //grab the gl1 data
   Gl1Packet *gl1PacketInfo = findNode::getClass<Gl1Packet>(topNode, "GL1Packet");
   if (!gl1PacketInfo)
@@ -212,7 +214,6 @@ int JetValidation::process_event(PHCompositeNode *topNode)
       triggervec = (triggervec >> 1U) & 0xffffffffU;
     }
   }
-  
   
 //  triggeranalyzer->decodeTriggers(topNode);
 //
@@ -239,7 +240,6 @@ int JetValidation::process_event(PHCompositeNode *topNode)
 	<< m_recoJetName << std::endl;
       exit(-1);
     }
-
   //interface to truth jets
   //JetMap* jetsMC = findNode::getClass<JetMap>(topNode, m_truthJetName);
   JetContainer* jetsMC = findNode::getClass<JetContainer>(topNode, m_truthJetName);
@@ -678,7 +678,6 @@ int JetValidation::process_event(PHCompositeNode *topNode)
   
   //fill the tree
   m_T->Fill();
-
   return Fun4AllReturnCodes::EVENT_OK;
 }
 

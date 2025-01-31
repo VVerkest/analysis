@@ -8,6 +8,7 @@
 #include <jetbase/Jetv2.h>
 
 #include <calotrigger/TriggerAnalyzer.h>
+#include <jetBackgroundCut.h>
 
 #include <string>
 #include <vector>

@@ -23,12 +23,14 @@
 #include <Calo_Calib.C>
 #include <HIJetReco.C>
 #include <JetValidation.h>
+#include <jetBackgroundCut.h>
 
 R__LOAD_LIBRARY(libfun4all.so)
 R__LOAD_LIBRARY(libcalotrigger.so)
 R__LOAD_LIBRARY(libg4jets.so)
 R__LOAD_LIBRARY(libglobalvertex.so)
 R__LOAD_LIBRARY(libjetbackground.so)
+R__LOAD_LIBRARY(libjetbackgroundcut.so)
 R__LOAD_LIBRARY(libJetValidation.so)
 R__LOAD_LIBRARY(libg4centrality.so)
 R__LOAD_LIBRARY(libg4dst.so)
@@ -67,21 +69,23 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
   cent->GetCalibrationParameters().ReadFromFile("centrality", "xml", 0, 0, string(getenv("CALIBRATIONROOT")) + string("/Centrality/"));
   se->registerSubsystem( cent );
 
-
   Enable::VERBOSITY = verbosity;
   
   Process_Calo_Calib();  //  DST_JETCALO has raw towers, so you can call process_calib() to produce the calibrated tower on the fly
   
 //  HIJetReco();
 
-  JetValidation *myJetVal = new JetValidation("AntiKt_Tower_r04_Sub1", "AntiKt_Truth_r04", outname);
+//  jetBackgroundCut* jbc = new jetBackgroundCut("AntiKt_unsubtracted_r04", "jetbgcut", 0, 1);
+//  se->registerSubsystem(jbc); 
 
-  myJetVal->setPtRange(5, 100);
-  myJetVal->setEtaRange(-0.7, 0.7);
-  myJetVal->doUnsub(0);
-  myJetVal->doTruth(0);
-  myJetVal->doSeeds(0);
-  se->registerSubsystem(myJetVal);
+//  JetValidation *myJetVal = new JetValidation("AntiKt_unsubtracted_r04", "AntiKt_Truth_r04", outname);
+
+//  myJetVal->setPtRange(5, 100);
+//  myJetVal->setEtaRange(-0.7, 0.7);
+//  myJetVal->doUnsub(0);
+//  myJetVal->doTruth(0);
+//  myJetVal->doSeeds(0);
+//  se->registerSubsystem(myJetVal);
 
   TriggerRunInfoReco *triggerruninforeco = new TriggerRunInfoReco();
   se->registerSubsystem(triggerruninforeco);
@@ -109,9 +113,19 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
 //  Fun4AllInputManager *in4 = new Fun4AllDstInputManager("DSTcalo");
 //  in4->AddFile(filelistcalo);
 //  se->registerInputManager(in4);
-  
 
-  
+  jetBackgroundCut* jbc = new jetBackgroundCut("AntiKt_unsubtracted_r04", "jetbgcut", 3, 0);
+  se->registerSubsystem(jbc); 
+
+  JetValidation *myJetVal = new JetValidation("AntiKt_unsubtracted_r04", "AntiKt_Truth_r04", outname);
+
+  myJetVal->setPtRange(5, 100);
+  myJetVal->setEtaRange(-0.7, 0.7);
+  myJetVal->doUnsub(0);
+  myJetVal->doTruth(0);
+  myJetVal->doSeeds(0);
+  se->registerSubsystem(myJetVal);
+
   se->run(-1);
   se->End();
 
