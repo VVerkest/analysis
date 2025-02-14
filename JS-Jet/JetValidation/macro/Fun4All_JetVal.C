@@ -114,7 +114,7 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
 //  in4->AddFile(filelistcalo);
 //  se->registerInputManager(in4);
 
-  jetBackgroundCut* jbc = new jetBackgroundCut("AntiKt_unsubtracted_r04", "jetbgcut", 3, 0);
+  jetBackgroundCut* jbc = new jetBackgroundCut("AntiKt_unsubtracted_r04", "jetbgcut", 0, 1);
   se->registerSubsystem(jbc); 
 
   JetValidation *myJetVal = new JetValidation("AntiKt_unsubtracted_r04", "AntiKt_Truth_r04", outname);

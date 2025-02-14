@@ -513,7 +513,8 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     
     double energy = rawTowersOH3->get_tower_at_channel(iter)->get_energy();
 
-    if (energy < 0.05) {continue;}
+    //if (energy < 0.05) {continue;}
+    if (energy < -10) {continue;}
     
     unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
     unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
@@ -544,7 +545,8 @@ int JetValidation::process_event(PHCompositeNode *topNode)
 
     double energy = rawTowersIH3->get_tower_at_channel(iter)->get_energy();
 
-    if (energy < 0.01) {continue;}
+    //if (energy < 0.01) {continue;}
+    if (energy < -10) {continue;}
     
     unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
     unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
@@ -574,7 +576,8 @@ int JetValidation::process_event(PHCompositeNode *topNode)
 
     double energy = rawTowersEM3->get_tower_at_channel(iter)->get_energy();
 
-    if (energy < 0.08) {continue;}
+    //if (energy < 0.08) {continue;}
+    if (energy < -10) {continue;}
     
     unsigned int iphi = TowerInfoDefs::getCaloTowerPhiBin(towerkey);
     unsigned int ieta = TowerInfoDefs::getCaloTowerEtaBin(towerkey);
@@ -590,7 +593,6 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     m_UE_phi.push_back(tower_phi);
     m_UE_caloID.push_back(2);
   }
-  
 
   //get truth jets
   if(m_doTruthJets)
