@@ -8,7 +8,6 @@
 #include <jetbase/Jetv2.h>
 
 #include <calotrigger/TriggerAnalyzer.h>
-#include <jetBackgroundCut.h>
 
 #include <string>
 #include <vector>
@@ -133,6 +132,8 @@ class JetValidation : public SubsysReco
   std::vector<float> m_UE_energy;
   std::vector<float> m_UE_eta;
   std::vector<float> m_UE_phi;
+  std::vector<int> m_UE_ieta;
+  std::vector<int> m_UE_iphi;
   std::vector<int> m_UE_caloID;
 
   //! clusters

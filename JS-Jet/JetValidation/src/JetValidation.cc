@@ -21,8 +21,9 @@
 #include <calobase/TowerInfo.h>
 #include <calotrigger/TriggerAnalyzer.h>
 #include <ffarawobjects/Gl1Packet.h>
+#include <ffaobjects/EventHeader.h>
 #include <jetbackground/TowerBackground.h>
-#include <jetBackgroundCut.h>
+//#include <jetBackgroundCut.h>
 #include <calobase/RawCluster.h>
 #include <calobase/RawClusterContainer.h>
 #include <calobase/RawClusterUtility.h>
@@ -74,6 +75,8 @@ JetValidation::JetValidation(const std::string& recojetname, const std::string& 
   , m_UE_energy()
   , m_UE_eta()
   , m_UE_phi()
+  , m_UE_ieta()
+  , m_UE_iphi()
   , m_UE_caloID()
   , m_cleta()
   , m_clphi()
@@ -136,6 +139,8 @@ int JetValidation::Init(PHCompositeNode *topNode)
   m_T->Branch("UE_energy", &m_UE_energy);
   m_T->Branch("UE_eta", &m_UE_eta);
   m_T->Branch("UE_phi", &m_UE_phi);
+  m_T->Branch("UE_ieta", &m_UE_ieta);
+  m_T->Branch("UE_iphi", &m_UE_iphi);
   m_T->Branch("UE_caloID", &m_UE_caloID);
 
   m_T->Branch("cleta", &m_cleta);
@@ -189,12 +194,22 @@ int JetValidation::InitRun(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int JetValidation::process_event(PHCompositeNode *topNode)
 {
-  //  std::cout << "JetValidation::process_event(PHCompositeNode *topNode) Processing Event" << std::endl;
-  ++m_event;
+    std::cout << "JetValidation::process_event(PHCompositeNode *topNode) Processing Event" << std::endl;
+    ++m_event;
 
-    if (m_event%100==0) {
+  EventHeader* eventInfo = findNode::getClass<EventHeader>(topNode,"EventHeader");
+  if(!eventInfo)
+  {
+    cout << PHWHERE << "EventValidation::process_event - Fatal Error - EventHeader node is missing. " << endl;
+    return Fun4AllReturnCodes::ABORTEVENT;
+  }
+
+//    m_event = eventInfo->get_EvtSequence();
+//  int m_run         = eventInfo->get_RunNumber();
+
+    //if (m_event%100==0) {
       cout<<"Event "<<m_event<<endl;
-    }
+    //}
 
 
   //grab the gl1 data
@@ -301,6 +316,12 @@ int JetValidation::process_event(PHCompositeNode *topNode)
       GlobalVertex *vtx = vertexmap->begin()->second;
       m_zvtx = vtx->get_z();
     }
+
+  cout<<fabs(m_zvtx)<<endl;
+  if (fabs(m_zvtx)>50.)
+  {
+    return Fun4AllReturnCodes::ABORTEVENT;
+  }
 
   //calorimeter towers
   TowerInfoContainer *towersEM3 = findNode::getClass<TowerInfoContainer>(topNode, "TOWERINFO_CALIB_CEMC_RETOWER_SUB1");
@@ -494,8 +515,8 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     exit(-1);
   }
   
-//  Jet *leadJet = jets->get_jet(0);
-//  float leadJet_phi = leadJet->get_phi();
+  //Jet *leadJet = jets->get_jet(0);
+  float leadJet_phi = leadJet->get_phi();
   
   unsigned int tower_range;
   
@@ -523,12 +544,14 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     float tower_phi = tower_geomOH->get_tower_geometry(key)->get_phi();
     float tower_eta = tower_geomOH->get_tower_geometry(key)->get_eta();
   
-//    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
+    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
 
     m_UE_energy.push_back(energy);
     
     m_UE_eta.push_back(tower_eta);
     m_UE_phi.push_back(tower_phi);
+    m_UE_ieta.push_back(ieta);
+    m_UE_iphi.push_back(iphi);
     m_UE_caloID.push_back(0);
   }
   
@@ -555,11 +578,13 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     float tower_phi = tower_geom->get_tower_geometry(key)->get_phi();
     float tower_eta = tower_geom->get_tower_geometry(key)->get_eta();
   
-//    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
+    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
 
     m_UE_energy.push_back(energy);
     m_UE_eta.push_back(tower_eta);
     m_UE_phi.push_back(tower_phi);
+    m_UE_ieta.push_back(ieta);
+    m_UE_iphi.push_back(iphi);
     m_UE_caloID.push_back(1);
   }
   
@@ -586,11 +611,13 @@ int JetValidation::process_event(PHCompositeNode *topNode)
     float tower_phi = emc_tower_geom->get_tower_geometry(key)->get_phi();
     float tower_eta = emc_tower_geom->get_tower_geometry(key)->get_eta();
   
-//    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
+    if ( delta_phi(leadJet_phi,tower_phi) < M_PI/3. || delta_phi(leadJet_phi,tower_phi) > 2.*M_PI/3. ) {continue;}  // only transverse to jet in phi
     
     m_UE_energy.push_back(energy);
     m_UE_eta.push_back(tower_eta);
     m_UE_phi.push_back(tower_phi);
+    m_UE_ieta.push_back(ieta);
+    m_UE_iphi.push_back(iphi);
     m_UE_caloID.push_back(2);
   }
 
@@ -662,7 +689,7 @@ int JetValidation::process_event(PHCompositeNode *topNode)
       CLHEP::Hep3Vector E_vec_cluster_Full = RawClusterUtility::GetEVec(*recoCluster, vertex);
 
       float clus_phi = E_vec_cluster.phi();
-//      if ( delta_phi(leadJet_phi,clus_phi) < M_PI/3. || delta_phi(leadJet_phi,clus_phi) > 2.*M_PI/3. ) {continue;}
+      if ( delta_phi(leadJet_phi,clus_phi) < M_PI/3. || delta_phi(leadJet_phi,clus_phi) > 2.*M_PI/3. ) {continue;}
 
       float clusE = E_vec_cluster_Full.mag();
       float clusEcore = E_vec_cluster.mag();
@@ -721,6 +748,8 @@ int JetValidation::ResetEvent(PHCompositeNode *topNode)
   m_UE_energy.clear();
   m_UE_eta.clear();
   m_UE_phi.clear();
+  m_UE_ieta.clear();
+  m_UE_iphi.clear();
   m_UE_caloID.clear();
 
   m_cle.clear();

@@ -22,12 +22,15 @@ source /opt/sphenix/core/bin/setup_local.sh $MYINSTALL
 #dataFileList="/sphenix/lustre01/sphnxpro/mdc2/js_pp200_signal/nopileup/calocluster/run0022/jet10/DST_CALO_CLUSTER_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
 #truthList="/sphenix/lustre01/sphnxpro/mdc2/js_pp200_signal/nopileup/trkrhit/run0022/jet10/DST_TRUTH_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
 
-dataFileList="DST_CALO_CLUSTER_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
-#truthList="DST_TRUTH_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
-truthList="DST_TRUTH_RECO_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
-globalList="DST_GLOBAL_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
+#dataFileList="DST_CALO_CLUSTER_pythia8_Jet10-0000000021-$(printf "%06d" $1).root"
+##truthList="DST_TRUTH_pythia8_Jet10-0000000022-$(printf "%06d" $1).root"
+#truthList="DST_TRUTH_RECO_pythia8_Jet10-0000000021-$(printf "%06d" $1).root"
+#globalList="DST_GLOBAL_pythia8_Jet10-0000000021-$(printf "%06d" $1).root"
 
-#dataFileList=$HOME/dst_calo_run2pp-00042183.list
+dataFileList="lists/run21/jet10/dst_calo_cluster_$(printf "%03d" $1).list"
+truthList="lists/run21/jet10/dst_truth_reco_$(printf "%03d" $1).list"
+globalList="lists/run21/jet10/dst_global_$(printf "%03d" $1).list"
+
 #dataFileList=$HOME/dst_calo_run2pp-00042183.list
 #dataFileList="/sphenix/lustre01/sphnxpro/physics/slurp/caloy2calib/ana437_2024p007/run_00053300_00053400/DST_CALO_run2pp_ana437_2024p007-00053376-$(printf "%05d" $1).root"
 #dataFileList="/sphenix/lustre01/sphnxpro/physics/slurp/caloy2calib/ana437_2024p007/run_00053300_00053400/DST_CALO_run2pp_ana437_2024p007-00053376-"$(printf "%05d" $1).root

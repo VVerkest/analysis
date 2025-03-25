@@ -11,44 +11,17 @@ AM_LDFLAGS = \
   -L$(OFFLINE_MAIN)/lib64
 
 pkginclude_HEADERS = \
-  JetValidation.h \
-  jetBackgroundCut.h
-
-ROOTDICTS = 
-
-pcmdir = $(libdir)
-nobase_dist_pcm_DATA =
-
-libjetbackgroundcut_io_la_SOURCES = \
-  $(ROOTDICTS) 
-
-libjetbackgroundcut_la_SOURCES = \
-  jetBackgroundCut.cc
-
-libjetbackgroundcut_io_la_LIBADD = \
-  -lphool -lSubsysReco -lmbd_io -ljetbase
-
-libjetbackgroundcut_la_LIBADD = \
-  libjetbackgroundcut_io.la \
-  -lcalo_io \
-  -lSubsysReco -lffaobjects -lmbd_io \
-  -ljetbase -lglobalvertex
+  JetValidation.h
 
 lib_LTLIBRARIES = \
-  libJetValidation.la \
-  libjetbackgroundcut_io.la \
-  libjetbackgroundcut.la
+  libJetValidation.la
 
 libJetValidation_la_SOURCES = \
-  JetValidation.cc \
-  $(ROOTDICTS)
+  JetValidation.cc
 
 libJetValidation_la_LIBADD = \
   -lphool \
   -lSubsysReco \
-  -lcalotrigger \
-  -lcalotrigger_io \
-  -ljetbackgroundcut \
   -lfun4all \
   -lg4dst \
   -lg4eval \

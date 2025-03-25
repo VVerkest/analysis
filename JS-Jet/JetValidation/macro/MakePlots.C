@@ -13,14 +13,25 @@ void MakePlots(){
 //  const char *infilename = "analysis_output_fullEta_50MeV.root";
 //  const char *plotdir = "plots/50MeV/";
   
-//  const char *infilename = "analysis_output_ana462_2024p007_00049219_noJetCut_100MeV.root";
-//  const char *plotdir = "plots/100MeV/";
-//  const char *infilename = "analysis_output_ana462_2024p007_00049219_jetBkgCut_100MeV.root";
-//  const char *plotdir = "plots/jetBkgCut/100MeV/";
+//  const char *infilename = "analysis_output_ana462_2024p007_00049219_noJetCut_200MeV.root";
+//  const char *plotdir = "plots/200MeV/";
+//  const char *infilename = "analysis_output_ana462_2024p007_00049219_jetBkgCut_noMinE.root";
+//  const char *plotdir = "plots/jetBkgCut/noMinE/";
+//  const char *infilename = "analysis_output_ana462_2024p007_00049219_jetBkgCut_200MeV.root";
+//  const char *plotdir = "plots/jetBkgCut/200MeV/";
 
-  const char *infilename = "analysis_output_JetVal_pythia8_Jet10_0_100MeV.root";
-  const char *plotdir = "plots/sim/100MeV/";
+//  const char *infilename = "analysis_output_JetVal_pythia8_Jet10_noMinE.root";
+//  const char *plotdir = "plots/sim/noMinE/";
 
+//  const char *infilename = "analysis_output_JetVal_pythia8_Jet10_0_noMinE.root";
+//  const char *plotdir = "plots/run21/jet10/noMinE";
+
+  const char *infilename = "test.root";
+  const char *plotdir = "plots/run21/jet10/noMinE";
+
+//  const char *infilename = "analysis_output_JetVal_pythia8_Jet10_200MeV.root";
+//  const char *plotdir = "plots/sim/200MeV/";
+  
   TFile *infile = new TFile(infilename,"READ");
   
   
@@ -39,6 +50,13 @@ void MakePlots(){
   TH2D *hLeadPtVsUEclusterEnergy = (TH2D*)infile->Get("hLeadPtVsUEclusterEnergy");
   TH2D *h_nUEtowersVSjetPt = (TH2D*)infile->Get("h_nUEtowersVSjetPt");
   TH2D *h_nUEclustersVSjetPt = (TH2D*)infile->Get("h_nUEclustersVSjetPt");
+
+//  hLeadPtVsUEenergy->GetXaxis()->SetRangeUser(0,80);
+//  hLeadPtVsUE_spectrum->GetXaxis()->SetRangeUser(0,80);
+//  hLeadPtVsUEcluster_spectrum->GetXaxis()->SetRangeUser(0,80);
+//  hLeadPtVsUEclusterEnergy->GetXaxis()->SetRangeUser(0,80);
+//  h_nUEtowersVSjetPt->GetXaxis()->SetRangeUser(0,80);
+//  h_nUEclustersVSjetPt->GetXaxis()->SetRangeUser(0,80);
 
   
   const int layers = 3;
@@ -172,3 +190,15 @@ void MakePlots(){
   c14->SaveAs(Form("%snUEclustersVSjetPt.pdf",plotdir),"PDF");
 
 }
+/*
+hadd JetVal_pythia8_Jet10_0.root ../JetVal_pythia8_Jet10_000*.root &
+hadd JetVal_pythia8_Jet10_1.root ../JetVal_pythia8_Jet10_001*.root &
+hadd JetVal_pythia8_Jet10_2.root ../JetVal_pythia8_Jet10_002*.root &
+hadd JetVal_pythia8_Jet10_3.root ../JetVal_pythia8_Jet10_003*.root &
+hadd JetVal_pythia8_Jet10_4.root ../JetVal_pythia8_Jet10_004*.root &
+hadd JetVal_pythia8_Jet10_5.root ../JetVal_pythia8_Jet10_005*.root &
+hadd JetVal_pythia8_Jet10_6.root ../JetVal_pythia8_Jet10_006*.root &
+hadd JetVal_pythia8_Jet10_7.root ../JetVal_pythia8_Jet10_007*.root &
+hadd JetVal_pythia8_Jet10_8.root ../JetVal_pythia8_Jet10_008*.root &
+hadd JetVal_pythia8_Jet10_9.root ../JetVal_pythia8_Jet10_009*.root &
+ */

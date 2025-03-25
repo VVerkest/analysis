@@ -4,6 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+
 double delta_phi(double phi1, double phi2){
   double dPhi = phi1 - phi2;
   while (dPhi>=M_PI) { dPhi -= 2.*M_PI; }
@@ -17,6 +18,8 @@ double delta_phi(double phi1, double phi2){
 
 void T::Loop()
 {
+  gDebug = 0;
+
 //   In a ROOT session, you can do:
   /*
 root
@@ -24,21 +27,59 @@ root
 T t
 t.Loop();
 
-hLeadPtVsUEenergy->Draw("COLZ")
+root -l -b T.C+\(\"JetVal_pythia8_Jet10_0927.root\",-10.\)
+   
+root
+.L T.C
+T t("JetVal_pythia8_Jet10_0927.root",-10.)
+t.Loop()
+
+root
+.L T.C("analysis_output_JetVal_run2pp_ana462_2024p007_00049219_jetBkgCut_200MeV.root",-10.)
+T t("analysis_output_JetVal_run2pp_ana462_2024p007_00049219_jetBkgCut_200MeV.root",-10.)
+
+   root -l -b -q "T.C+"
+   
+   hLeadPtVsUEenergy->Draw("COLZ")
 new TCanvas;
 hLeadingJetSpectrum->Draw("E");
 
    */
   
+  if (!tree) {
+      std::cerr << "Error: TTree not found in file!" << std::endl;
+      return;
+  }
+
+  std::vector<std::string> branchNames = {
+      "m_event", "nJet", "cent", "zvtx", "b", "id", "nComponent", "triggerVector",
+      "eta", "phi", "e", "pt", "UE_energy", "UE_eta", "UE_phi", "UE_caloID",
+      "cleta", "clphi", "cle", "clecore", "clpt", "clprob", "pt_unsub", "subtracted_et"
+  };
+
+  for (const auto& branchName : branchNames) {
+      if (!tree->GetBranch(branchName.c_str())) {
+          std::cerr << "Warning: Branch '" << branchName << "' not found in the tree!" << std::endl;
+      }
+    if (!branchName.c_str()) {
+        std::cerr << "Warning: Branch '" << branchName << "' nullptr!" << std::endl;
+    }  }
+
+
+  
+  TString output = "test.root";
 //  double minE = 0.1;
-  double minE = 0.2;
+//  double minE = 0.2;
 //  double minE = -10.;
 //  TFile *outfile = new TFile("analysis_output_ana462_2024p007_00049219_noJetCut_noMinE.root","RECREATE");
 //  TFile *outfile = new TFile("analysis_output_ana462_2024p007_00049219_jetBkgCut_100MeV.root","RECREATE");
 //  TFile *outfile = new TFile("analysis_output_ana462_2024p007_00049219_jetBkgCut_noMinE.root","RECREATE");
-  TFile *outfile = new TFile("analysis_output_JetVal_pythia8_Jet10_0_200MeV.root","RECREATE");
+//  TFile *outfile = new TFile("analysis_output_JetVal_pythia8_Jet10_0_200MeV.root","RECREATE");
 //  TFile *outfile = new TFile("analysis_output_JetVal_pythia8_Jet10_0_noMinE.root","RECREATE");
+  TFile *outfile = new TFile(output,"RECREATE");
 
+  
+  cout<<minE<<endl;
   //      root> t.GetEntry(12); // Fill t data members with entry number 12
 //      root> t.Show();       // Show values of entry 12
 //      root> t.Show(16);     // Read and show values of entry 16
@@ -77,14 +118,14 @@ hLeadingJetSpectrum->Draw("E");
   TH2D *hLeadingJetEtaPhi = new TH2D("hLeadingJetEtaPhi",";leading jet #eta;leading jet #phi",100,-1.,1.,100,-M_PI,M_PI);
   TH2D *hLeadingJetEtaPhi_pTweighted = new TH2D("hLeadingJetEtaPhi_pTweighted",";leading jet #eta;leading jet #phi",100,-1.,1.,100,-M_PI,M_PI);
   TH2D *hLeadPtVsUEenergy = new TH2D("hLeadPtVsUEenergy",";leading jet p_{T} [GeV];UE E [GeV]",125,0.,125.,80,-15.,25.);
-  TH2D *hLeadPtVsUE_spectrum = new TH2D("hLeadPtVsUE_spectrum",";leading jet p_{T} [GeV];UE E spectrum [GeV]",125,0.,125.,50,-5.,20.);
+  TH2D *hLeadPtVsUE_spectrum = new TH2D("hLeadPtVsUE_spectrum",";leading jet p_{T} [GeV];UE E spectrum [GeV]",125,0.,125.,100,-5.,20.);
   TH2D *hTotalClusterEnergyVsUEenergy = new TH2D("hTotalClusterEnergyVsUEenergy",";EMCal cluster E [GeV];UE E [GeV]",100,0.,50,50,-20.,30.);
   TH2D *h_nUEtowersVSjetPt = new TH2D("h_nUEtowersVSjetPt",";leading jet p_{T} [GeV];# UE towers",125,0.,125.,50,0.,50.);
   TH2D *h_nUEclustersVSjetPt = new TH2D("h_nUEclustersVSjetPt",";leading jet p_{T} [GeV];# UE clusters",125,0.,125.,120,0.,120.);
 
   TH1D *hUEcluster_spectrum = new TH1D("hUEcluster_spectrum",";UE cluster E [GeV]",30,0.,15.);
   TH2D *hLeadPtVsUEclusterEnergy = new TH2D("hLeadPtVsUEclusterEnergy",";leading jet p_{T} [GeV];UE cluster E [GeV]",125,0.,125.,80,-10.,30.);
-  TH2D *hLeadPtVsUEcluster_spectrum = new TH2D("hLeadPtVsUEcluster_spectrum",";leading jet p_{T} [GeV];UE cluster E spectrum [GeV]",125,0.,125.,30,0.,15.);
+  TH2D *hLeadPtVsUEcluster_spectrum = new TH2D("hLeadPtVsUEcluster_spectrum",";leading jet p_{T} [GeV];UE cluster E spectrum [GeV]",125,0.,125.,60,0.,15.);
 
   TH3D *hLeadJetPhi_caloE = new TH3D("hLeadJetPhi_caloE",";leading jet #phi;#Sigma calo E;caloID",100,-M_PI,M_PI,200,-100.,100.,3,0.,3.);
   TH3D *hLeadJetPtPhi_nTowers = new TH3D("hLeadJetPtPhi_nTowers",";leading jet p_{T} [GeV];leading jet #phi;number of towers",125,0.,125.,100,-M_PI,M_PI,1000,0.,1000.);
@@ -164,23 +205,36 @@ hLeadingJetSpectrum->Draw("E");
   TH2D *hEMCalClusterEtaPhi = new TH2D("hEMCalClusterEtaPhi",";tower #eta;tower #phi",220,-1.1,1.1,156,-M_PI,M_PI);
   TH2D *hEMCalClusterEtaPhi_Eweighted = new TH2D("hEMCalClusterEtaPhi_Eweighted",";tower #eta;tower #phi",220,-1.1,1.1,156,-M_PI,M_PI);
     
+  
+//  tree->SetCacheSize(0);
+  tree->SetMakeClass(1); // Forces safe branch reading
+  tree->SetBranchStatus("*", 1); // Ensures all branches are active
+
    if (fChain == 0) return;
 
    Long64_t nentries = fChain->GetEntriesFast();
   cout<<nentries<<" entries in tree"<<endl;
 //  nentries = 10000;
    Long64_t nbytes = 0, nb = 0;
-   for (Long64_t jentry=0; jentry<nentries;jentry++) {
+  for (Long64_t jentry=0; jentry<nentries;jentry++) {
+     
+//     Long64_t bytesRead = tree->GetEntry(jentry);
+//     if (bytesRead <= 0) {
+//         std::cerr << "Error reading entry " << jentry << " (bytes read: " << bytesRead << ")" << std::endl;
+//         continue;
+//     }
+     
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
-     
+
      if (ientry%10000==0) { cout<<"entry "<<ientry<<endl;}
      
 //     if ( triggerVector->at(17)==0 && triggerVector->at(18)==0 && triggerVector->at(19)==0 && triggerVector->at(21)==0 && triggerVector->at(22)==0 && triggerVector->at(23)==0 ) {continue;}
 
 //Very roughly I think the noise thresholds for the EMCal, IHCal and OHCal should be around 90 MeV for the EMCal, 15 MeV for the IHCal and 90 MeV for the OHCal so I feel like 0.1 GeV is a good cut?
+     if (!zvtx) {continue;}
      if (fabs(zvtx)>50.) {continue;}
 
      float lead_pt=0;

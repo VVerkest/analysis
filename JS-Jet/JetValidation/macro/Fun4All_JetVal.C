@@ -53,7 +53,7 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
 //  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filelistjet);
 //    int runnumber = runseg.first;
   
-  rc->set_StringFlag("CDB_GLOBALTAG", "2024p009");
+  rc->set_StringFlag("CDB_GLOBALTAG", "ProdA_2024");
   rc->set_uint64Flag("TIMESTAMP",49219);
 
 //  pair<int, int> runseg = Fun4AllUtils::GetRunSegment(filelistjetcalo);
@@ -126,7 +126,7 @@ void Fun4All_JetVal(const char *filelistjetcalo = "dst_jet_calo.list",
   myJetVal->doSeeds(0);
   se->registerSubsystem(myJetVal);
 
-  se->run(-1);
+  se->run(500);
   se->End();
 
   gSystem->Exit(0);

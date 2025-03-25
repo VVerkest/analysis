@@ -19,6 +19,8 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TH3D.h>
+#include <iostream>
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -28,8 +30,13 @@
 class T {
   public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+  TTree          *tree;
   Int_t           fCurrent; //!current Tree number in a TChain
-  
+  TString inputFileName;
+  double minE;
+
+//  TString fileName = "out/run21/JetVal_pythia8_Jet10_0.root";
+//  TString fileName = "JetVal_run2pp_ana462_2024p007_00049219_noJetCut.root";
   // Fixed size dimensions of array or collections stored in the TTree if any.
   
   // Declaration of leaf types
@@ -59,32 +66,33 @@ class T {
   vector<float>   *subtracted_et;
   
   // List of branches
-  TBranch        *b_event;   //!
-  TBranch        *b_nJet;   //!
-  TBranch        *b_cent;   //!
-  TBranch        *b_zvtx;   //!
-  TBranch        *b_b;   //!
-  TBranch        *b_id;   //!
-  TBranch        *b_nComponent;   //!
-  TBranch        *b_triggerVector;   //!
-  TBranch        *b_eta;   //!
-  TBranch        *b_phi;   //!
-  TBranch        *b_e;   //!
-  TBranch        *b_pt;   //!
-  TBranch        *b_UE_energy;   //!
-  TBranch        *b_UE_eta;   //!
-  TBranch        *b_UE_phi;   //!
-  TBranch        *b_UE_caloID;   //!
-  TBranch        *b_cleta;   //!
-  TBranch        *b_clphi;   //!
-  TBranch        *b_cle;   //!
-  TBranch        *b_clecore;   //!
-  TBranch        *b_clpt;   //!
-  TBranch        *b_clprob;   //!
-  TBranch        *b_pt_unsub;
-  TBranch        *b_subtracted_et;
+  TBranch        *b_event = nullptr;   //!
+  TBranch        *b_nJet = nullptr;   //!
+  TBranch        *b_cent = nullptr;   //!
+  TBranch        *b_zvtx = nullptr;   //!
+  TBranch        *b_b = nullptr;   //!
+  TBranch        *b_id = nullptr;   //!
+  TBranch        *b_nComponent = nullptr;   //!
+  TBranch        *b_triggerVector = nullptr;   //!
+  TBranch        *b_eta = nullptr;   //!
+  TBranch        *b_phi = nullptr;   //!
+  TBranch        *b_e = nullptr;   //!
+  TBranch        *b_pt = nullptr;   //!
+  TBranch        *b_UE_energy = nullptr;   //!
+  TBranch        *b_UE_eta = nullptr;   //!
+  TBranch        *b_UE_phi = nullptr;   //!
+  TBranch        *b_UE_caloID = nullptr;   //!
+  TBranch        *b_cleta = nullptr;   //!
+  TBranch        *b_clphi = nullptr;   //!
+  TBranch        *b_cle = nullptr;   //!
+  TBranch        *b_clecore = nullptr;   //!
+  TBranch        *b_clpt = nullptr;   //!
+  TBranch        *b_clprob = nullptr;   //!
+  TBranch        *b_pt_unsub;   //!
+  TBranch        *b_subtracted_et;   //!
   
-  T(TTree *tree=0);
+  T(const char* inputFile, double minEnergy);
+  T() {};  // Default constructor to allow ROOT instantiation (if needed)
   virtual ~T();
   virtual Int_t    Cut(Long64_t entry);
   virtual Int_t    GetEntry(Long64_t entry);
@@ -98,15 +106,19 @@ class T {
 #endif
 
 #ifdef T_cxx
-T::T(TTree *tree) : fChain(0) 
+//T::T(TString inputFileName, double minEnergy) : fChain(0)
+//{
+T::T(const char* inputFile, double minEnergy) : fChain(0), minE(minEnergy)
 {
+//  TString fileName = inputFileName;
   /*
    root
    .L T.C
    T t
    t.Loop();
    */
-  
+//  double minE = minEnergy;
+
   // if parameter tree is not specified (or zero), connect the file
   // used to generate this class and read the Tree.  const char *fileName = "JetVal_run2pp_ana437_2024p007_00049270.root";
   //  const char *fileName = "JetVal_run2pp_ana437_2024p007_00049219_calib.root";
@@ -114,16 +126,25 @@ T::T(TTree *tree) : fChain(0)
 //  const char *fileName = "JetVal_run2pp_ana446_2024p007_00049219_allUE.root";
 //  const char *fileName = "JetVal_run2pp_ana462_2024p007_00049219_jetBkgCut.root";
 //  const char *fileName = "JetVal_run2pp_ana462_2024p007_00049219_noJetCut.root";
-  const char *fileName = "JetVal_pythia8_Jet10_0.root";
-  if (tree == 0) {
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(fileName);
-    if (!f || !f->IsOpen()) {
-      f = new TFile(fileName);
-    }
-    f->GetObject("T",tree);
-    
+  
+  ROOT::EnableImplicitMT(0);
+
+  // Open file
+  TFile *f = new TFile(inputFile);
+  if (!f || f->IsZombie()) {
+      printf("Error: Could not open file %s!\n", inputFile);
+      return;
+  }
+
+  // Try to get tree
+  f->GetObject("T", tree);
+  if (!tree) {
+      printf("Error: Tree 'T' not found in file %s!\n", inputFile);
+      return;
   }
   Init(tree);
+  
+  Loop();
 }
 
 T::~T()
@@ -135,14 +156,20 @@ T::~T()
 Int_t T::GetEntry(Long64_t entry)
 {
   // Read contents of entry.
-  if (!fChain) return 0;
+  if (!fChain) {
+    cout<<"!fChain: see line "<<__LINE__<<" of header"<<endl;
+    return 0;
+  }
   return fChain->GetEntry(entry);
 }
 Long64_t T::LoadTree(Long64_t entry)
 {
   // Set the environment to read one entry
-  if (!fChain) return -5;
-  Long64_t centry = fChain->LoadTree(entry);
+  if (!fChain) {
+    cout<<"!fChain: see line "<<__LINE__<<" of header"<<endl;
+    return -5;
+  }
+    Long64_t centry = fChain->LoadTree(entry);
   if (centry < 0) return centry;
   if (fChain->GetTreeNumber() != fCurrent) {
     fCurrent = fChain->GetTreeNumber();

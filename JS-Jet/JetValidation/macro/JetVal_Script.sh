@@ -25,11 +25,13 @@ source /opt/sphenix/core/bin/setup_local.sh $MYINSTALL
 #dataFileList="/sphenix/lustre01/sphnxpro/production/physics/run2pp/caloy2calib/ana450_2024p009/run_00049200_00049300/DST_CALO_run2pp_ana446_2024p007-00049216-$(printf "%05d" $1).root"
 #truthList="/sphenix/lustre01/sphnxpro/production/physics/run2pp/caloy2fitting/ana446_2024p007/run_00049200_00049300/DST_CALOFITTING_run2pp_ana446_2024p007-00049219-$(printf "%05d" $1).root"
 
-jetcaloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00049200_00049300/dst/DST_JETCALO_run2pp_ana462_2024p010_v001-00049219-$(printf "%05d" $1).root"
-jetList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00049200_00049300/dst/DST_JET_run2pp_ana462_2024p010_v001-00049219-$(printf "%05d" $1).root"
-#geomList="/sphenix/lustre01/sphnxpro/production/physics/run2pp/caloy2fitting/ana446_2024p007/run_00049200_00049300/DST_CALOFITTING_run2pp_ana446_2024p007-00049219-$(printf "%05d" $1).root"
-caloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_CALO/run_00049200_00049300/dst/DST_CALO_run2pp_ana446_2024p007-00049219-$(printf "%05d" $1).root"
+jetcaloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_CALO/run_00049200_00049300/dst/DST_CALO_run2pp_ana462_2024p010_v001-00049219-$(printf "%05d" $1).root"
+jetList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00049200_00049300/dst/DST_JETCALO_run2pp_ana462_2024p010_v001-00049219-$(printf "%05d" $1).root"
+caloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00049200_00049300/dst/DST_JET_run2pp_ana462_2024p010_v001-00049219-$(printf "%05d" $1).root"
 
+#jetcaloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00053700_00053800/dst/DST_JETCALO_run2pp_ana462_2024p010_v001-00053794-$(printf "%05d" $1).root"
+#jetList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_JETCALO/run_00053700_00053800/dst/DST_JET_run2pp_ana462_2024p010_v001-00053794-$(printf "%05d" $1).root"
+#caloList="/sphenix/lustre01/sphnxpro/production/run2pp/physics/ana462_2024p010_v001/DST_CALO/run_00053700_00053800/dst/DST_CALO_run2pp_ana462_2024p010_v001-00053794-$(printf "%05d" $1).root"
 
 
 #dataFileList=$HOME/dst_calo_run2pp-00042183.list
@@ -52,7 +54,7 @@ echo caloList: $caloList
 
 #root.exe -q -b Fun4All_JetVal.C\(\"\",\"$dataFileList\",\"\",\"/sphenix/user/$USER/analysis/JS-Jet/JetValidation/macro/out/JetVal_run2pp_ana437_2024p007_00049270_$(printf "%04d" $1).root\"\)
 
-root.exe -q -b Fun4All_JetVal.C\(\"$jetcaloList\",\"$jetList\",\"$caloList\",\"/sphenix/user/$USER/analysis/JS-Jet/JetValidation/macro/out/JetVal_run2pp_ana462_2024p007_00049219_$(printf "%04d" $1).root\"\)
+root.exe -q -b Fun4All_JetVal.C\(\"$jetcaloList\",\"$jetList\",\"$caloList\",\"/sphenix/user/$USER/analysis/JS-Jet/JetValidation/macro/out/JetVal_run2pp_ana462_2024p010_v001_00049219_$(printf "%04d" $1).root\"\)
 
 
 #root.exe -q -b Fun4All_JetVal.C\(\"$jetcaloList\",\"$dataFileList\",\"$geomList\",\"$rawList\",\"/sphenix/user/$USER/analysis/JS-Jet/JetValidation/macro/out/JetVal_run2pp_ana446_2024p007_00049219_$(printf "%04d" $1).root\"\)
